@@ -386,9 +386,9 @@ void Notif::CommandResponse( aci_evt_t *aci_evt) {
              * Invalid ACI command opcode
              */
         case    ACI_CMD_INVALID:                    debug_println(F("Invalid Command")); break;
-
-        default:      
+                      
 #ifdef STATUS1	
+        default:      
             Serial.print(F("Evt Unk Cmd: "));
             Serial.println(  aci_evt->params.cmd_rsp.cmd_opcode); //hex(aci_evt->params.cmd_rsp.cmd_opcode);
 #endif
