@@ -2,7 +2,9 @@
 #include <inttypes.h>
 //#define DEBUG1
 //#define DEBUG2
-//#define DEBUG3
+//#define DEBUG3  
+//#define STATUS1	  
+
 #define NO_PACK
 #define PACK_LITTLE_ENDIAN
 
@@ -69,9 +71,11 @@ static ancs_parsing_env_t ancs_parsing_env;
             ancs_parsing_env.ahead = 0;
             
             command_send_enable = true;
-            debug2_println(F("[ANCS DS] Parsing is over!"));
+            debug2_println(F("[ANCS DS] Parsing is over!"));  
+#ifdef STATUS1	 
             Serial.print(F("[ANCS DS] Data received: "));
-            Serial.println((char*)ancs_parsing_env.buffer);
+            Serial.println((char*)ancs_parsing_env.buffer);   
+#endif
             notif =  ancs_cache_attribute(ancs_parsing_env.nid,
                                  ancs_parsing_env.aid, 
                                  (char*)ancs_parsing_env.buffer,
@@ -111,9 +115,11 @@ static ancs_parsing_env_t ancs_parsing_env;
             ancs_parsing_env.index = 0;
             ancs_parsing_env.ahead = 0;
             command_send_enable = true;
-            debug2_println(F("[ANCS DS] Parsing is over!"));
+            debug2_println(F("[ANCS DS] Parsing is over!"));  
+#ifdef STATUS1	 
             Serial.print(F("[ANCS DS] Data received: "));
-            Serial.println((char*)ancs_parsing_env.buffer);
+            Serial.println((char*)ancs_parsing_env.buffer);  
+#endif
             notif = ancs_cache_attribute(ancs_parsing_env.nid,
                                  ancs_parsing_env.aid, 
                                  (char*)ancs_parsing_env.buffer,

@@ -10,6 +10,7 @@
 #include "notif.h"
 
 //#define DEBUG1
+//#define STATUS1  
 
 #include "utilities.h"
 #include "services.h"
@@ -19,13 +20,15 @@
 extern boolean command_send_enable;
 
 void __ble_assert(const char *file, uint16_t line)
-{
+{         
+#ifdef STATUS1	
     Serial.print(F("ERROR "));
     Serial.print(file);
     Serial.print(F(": "));
     Serial.print(line);
     Serial.print(F("\n"));
-    while(1);
+    while(1); 
+#endif
 }
 
 
@@ -57,7 +60,8 @@ static struct aci_state_t aci_state;
 static hal_aci_evt_t  aci_data;
 
 
-void Notif::print_pipes(aci_evt_t* aci_evt) {
+void Notif::print_pipes(aci_evt_t* aci_evt) {  
+#ifdef STATUS1  
     Serial.print("Here are the available open pipes: ");
     for (uint8_t i=1; i<=NUMBER_OF_PIPES; ++i)
         if (lib_aci_is_pipe_available(&aci_state, i)) {
@@ -71,7 +75,8 @@ void Notif::print_pipes(aci_evt_t* aci_evt) {
             Serial.print(i);
             Serial.print(", ");
         }
-    Serial.println("");
+    Serial.println("");   
+#endif
 }
 
 void Notif::set_notification_callback_handle(void (*fptr)(ancs_notification_t* notif)) {
@@ -118,8 +123,10 @@ aci_status_code_t Notif::bond_data_restore( uint8_t eeprom_status, bool *bonded_
         }
         //Send the ACI Write Dynamic Data
         if (!hal_aci_tl_send(&aci_cmd))
-        {
-            Serial.println(F("bond_data_restore: Cmd Q Full"));
+        {        
+#ifdef STATUS1	
+            Serial.println(F("bond_data_restore: Cmd Q Full"));  
+#endif
             return ACI_STATUS_ERROR_INTERNAL;
         }
 
@@ -132,9 +139,11 @@ aci_status_code_t Notif::bond_data_restore( uint8_t eeprom_status, bool *bonded_
 
                 if (ACI_EVT_CMD_RSP != aci_evt->evt_opcode)
                 {
-                    //Got something other than a command response evt -> Error
+                    //Got something other than a command response evt -> Error     
+#ifdef STATUS1	
                     Serial.print(F("bond_data_restore: Expected cmd rsp evt. Got: 0x"));
-                    Serial.println(aci_evt->evt_opcode, HEX);
+                    Serial.println(aci_evt->evt_opcode, HEX);  
+#endif
                     return ACI_STATUS_ERROR_INTERNAL;
                 }
                 else
@@ -289,12 +298,16 @@ void Notif::DeviceStarted( aci_evt_t *aci_evt) {
                         Serial.println(F("   Make sure that the bond on the phone/PC is deleted as well."));*/
                         //We must have lost power and restarted and must restore the bonding infromation using the ACI Write Dynamic Data
                         if (ACI_STATUS_TRANSACTION_COMPLETE == bond_data_restore( eeprom_status, &bonded_first_time))
-                        {
-                            Serial.println(F("Bond information loaded into nRF8001"));
+                        {             
+#ifdef STATUS1	
+                            Serial.println(F("Bond information loaded into nRF8001"));  
+#endif
                         }
                         else
-                        {
+                        {   
+#ifdef STATUS1	
                             Serial.println(F("Bond restore failed. Delete the bond and try again."));
+#endif
                         }
                     }
                 }
@@ -302,16 +315,20 @@ void Notif::DeviceStarted( aci_evt_t *aci_evt) {
                 // Start bonding as all proximity devices need to be bonded to be usable
                 if (ACI_BOND_STATUS_SUCCESS != aci_state.bonded)
                 {
-                    lib_aci_bond(180/* in seconds */, 0x0050 /* advertising interval 50ms*/);
+                    lib_aci_bond(180/* in seconds */, 0x0050 /* advertising interval 50ms*/); 
+#ifdef STATUS1	
                     Serial.println(F("No Bond present in EEPROM."));
                     Serial.println(F("Advertising started : Waiting to be connected and bonded"));
+#endif	
                 }
                 else
                 {
                     //connect to an already bonded device
                     //Use lib_aci_direct_connect for faster re-connections with PC, not recommended to use with iOS/OS X
-                    lib_aci_connect(100/* in seconds */, 0x0020 /* advertising interval 20ms*/);
+                    lib_aci_connect(100/* in seconds */, 0x0020 /* advertising interval 20ms*/);  
+#ifdef STATUS1	
                     Serial.println(F("Already bonded : Advertising started : Waiting to be connected"));
+#endif
                 }
             }
             break;
@@ -370,9 +387,11 @@ void Notif::CommandResponse( aci_evt_t *aci_evt) {
              */
         case    ACI_CMD_INVALID:                    debug_println(F("Invalid Command")); break;
 
-        default:
+        default:      
+#ifdef STATUS1	
             Serial.print(F("Evt Unk Cmd: "));
             Serial.println(  aci_evt->params.cmd_rsp.cmd_opcode); //hex(aci_evt->params.cmd_rsp.cmd_opcode);
+#endif
     }
 }
 
@@ -610,11 +629,12 @@ void Notif::HwError(aci_evt_t *aci_evt)
 {
     debug_print(F("HW error: "));
     debug_println(aci_evt->params.hw_error.line_num, DEC);
-
+#ifdef STATUS1	
     for(uint8_t counter = 0; counter <= (aci_evt->len - 3); counter++)
     {
         Serial.write(aci_evt->params.hw_error.file_name[counter]); //uint8_t file_name[20];
-    }
+    }   
+#endif
     debug_println();
 
     //Manage the bond in EEPROM of the AVR

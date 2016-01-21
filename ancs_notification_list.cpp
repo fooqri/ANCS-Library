@@ -1,7 +1,8 @@
 /** (c)2013, Bernard Pratz, bernard at pratz dot net
  *  under the WTFPL License
  */
-//#define DEBUG1
+//#define DEBUG1      	 
+
 #include "ancs_base.h"
 #include "ancs_notification.h"
 #include "ancs_notification_list.h"
